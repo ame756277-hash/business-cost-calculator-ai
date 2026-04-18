@@ -268,6 +268,158 @@ function showHistory(){
 }
 
 showHistory();
+  <!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Universal Web App Builder</title>
+<style>
+body{
+  font-family: Arial;
+  background:#0f172a;
+  color:white;
+  text-align:center;
+  padding:20px;
+}
+textarea{
+  width:90%;
+  height:100px;
+  padding:10px;
+}
+button{
+  padding:10px 20px;
+  background:#22c55e;
+  border:none;
+  color:white;
+  border-radius:8px;
+  margin-top:10px;
+}
+iframe{
+  width:95%;
+  height:400px;
+  background:white;
+  margin-top:10px;
+}
+.card{
+  background:#1e293b;
+  margin-top:10px;
+  padding:10px;
+  border-radius:10px;
+}
+a{ color:#38bdf8; }
+</style>
+</head>
+<body>
+
+<h2>⚡ Universal App Builder</h2>
+
+<textarea id="prompt" placeholder="Example: todo app / calculator / landing page / form app"></textarea>
+
+<br>
+<button onclick="generate()">Generate App</button>
+
+<div id="output"></div>
+
+<h3>📜 History</h3>
+<div id="history"></div>
+
+<script>
+
+let apps = JSON.parse(localStorage.getItem("apps") || "[]");
+
+function generate(){
+
+  let p = document.getElementById("prompt").value.toLowerCase();
+
+  let html = "";
+
+  // ===== TODO APP =====
+  if(p.includes("todo")){
+    html = `
+    <h2>Todo App</h2>
+    <input id='task'>
+    <button onclick='add()'>Add</button>
+    <ul id='list'></ul>
+
+    <script>
+    function add(){
+      let li=document.createElement('li');
+      li.innerText=document.getElementById('task').value;
+      document.getElementById('list').appendChild(li);
+    }
+    <\/script>
+    `;
+  }
+
+  // ===== CALCULATOR =====
+  else if(p.includes("calculator")){
+    html = `
+    <h2>Calculator</h2>
+    <input id='a'>
+    <input id='b'>
+    <button onclick='sum()'>Add</button>
+    <h3 id='res'></h3>
+
+    <script>
+    function sum(){
+      let a=+document.getElementById('a').value;
+      let b=+document.getElementById('b').value;
+      document.getElementById('res').innerText=a+b;
+    }
+    <\/script>
+    `;
+  }
+
+  // ===== FORM APP =====
+  else if(p.includes("form")){
+    html = `
+    <h2>Form App</h2>
+    <input placeholder='Name'><br>
+    <input placeholder='Email'><br>
+    <button>Submit</button>
+    `;
+  }
+
+  // ===== DEFAULT =====
+  else{
+    html = "<h2>Custom App Mode</h2><p>Try: todo, calculator, form</p>";
+  }
+
+  let blob = new Blob([html], {type:"text/html"});
+  let url = URL.createObjectURL(blob);
+
+  document.getElementById("output").innerHTML = `
+    <h3>Preview</h3>
+    <iframe src="${url}"></iframe>
+    <br>
+    <a href="${url}" target="_blank">Open App</a>
+  `;
+
+  apps.push({prompt:p, url:url});
+  localStorage.setItem("apps", JSON.stringify(apps));
+
+  showHistory();
+}
+
+function showHistory(){
+  let h = "";
+  apps.forEach(a=>{
+    h += `
+    <div class="card">
+      <b>${a.prompt}</b><br>
+      <a href="${a.url}" target="_blank">Open</a>
+    </div>
+    `;
+  });
+  document.getElementById("history").innerHTML = h;
+}
+
+showHistory();
+
+</script>
+
+</body>
+</html>
 
 </script>
 
