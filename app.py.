@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Prompt App Builder</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    textarea, input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: #22c55e;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    iframe {
+      width: 95%;
+      height: 400px;
+      margin-top: 20px;
+      border-radius: 10px;
+      border: 2px solid #334155;
+      background: white;
+    }
+    .card {
+      background: #1e293b;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>⚡ Prompt App Builder</h2>
+
+<p>Prompt লিখে অ্যাপ বানাও</p>
+
+<textarea id="prompt" placeholder="Example: todo app / calculator / note app"></textarea>
+
+<br>
+
+<button onclick="generateApp()">Generate App</button>
+
+<div class="card">
+  <h3>Generated App Preview</h3>
+  <iframe id="preview"></iframe>
+</div>
+
+<script>
+function generateApp() {
+  let prompt = document.getElementById("prompt").value.toLowerCase();
+  let code = "";
+
+  // TODO APP
+  if (prompt.includes("todo")) {
+    code = `
+    <h2>Todo App</h2>
+    <input id='task' placeholder='Enter task'>
+    <button onclick='addTask()'>Add</button>
+    <ul id='list'></ul>
+
+    <script>
+    function addTask(){
+      let task = document.getElementById('task').value;
+      let li = document.createElement('li');
+      li.innerText = task;
+      document.getElementById('list').appendChild(li);
+    }
+    <\/script>
+    `;
+  }
+
+  // CALCULATOR
+  else if (prompt.includes("calculator")) {
+    code = `
+    <h2>Calculator</h2>
+    <input id='a' placeholder='Number 1'>
+    <input id='b' placeholder='Number 2'>
+    <button onclick='calc()'>Add</button>
+    <h3 id='res'></h3>
+
+    <script>
+    function calc(){
+      let a = Number(document.getElementById('a').value);
+      let b = Number(document.getElementById('b').value);
+      document.getElementById('res').innerText = a + b;
+    }
+    <\/script>
+    `;
+  }
+
+  // NOTE APP
+  else if (prompt.includes("note")) {
+    code = `
+    <h2>Note App</h2>
+    <textarea id='note'></textarea>
+    <button onclick='save()'>Save</button>
+    <p id='show'></p>
+
+    <script>
+    function save(){
+      document.getElementById('show').innerText =
+      document.getElementById('note').value;
+    }
+    <\/script>
+    `;
+  }
+
+  // DEFAULT
+  else {
+    code = "<h2>App not found</h2><p>Try: todo, calculator, note</p>";
+  }
+
+  let iframe = document.getElementById("preview");
+  iframe.srcdoc = code;
+}
+</script>
+
+</body>
+</html>
