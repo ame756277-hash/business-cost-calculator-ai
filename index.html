@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Business Calculator App</title>
+<title>Business Notebook</title>
 
 <style>
 body{
@@ -13,16 +13,17 @@ body{
   padding:20px;
 }
 
-input, select{
+input{
   width:85%;
   padding:10px;
-  margin:8px;
+  margin:6px;
   border-radius:8px;
   border:none;
 }
 
 button{
-  padding:10px 20px;
+  padding:10px 15px;
+  margin:5px;
   background:#22c55e;
   border:none;
   color:white;
@@ -37,60 +38,53 @@ button{
   border-radius:10px;
 }
 
-a{
-  color:#38bdf8;
-}
+a{ color:#38bdf8; }
 </style>
 
 </head>
 
 <body>
 
-<h2>💰 Business Profit Calculator</h2>
+<h2>📒 Business Notebook</h2>
 
 <p>Language / ভাষা</p>
-<select id="lang">
+<select id="lang" onchange="changeLang()">
   <option value="en">English</option>
   <option value="bn">বাংলা</option>
 </select>
 
 <div class="card">
 
-<h3 id="t1">Cost & Profit Calculator</h3>
+<h3 id="title">Add Product Entry</h3>
 
-<input id="cost" placeholder="Total Cost / মোট খরচ">
-<input id="sell" placeholder="Selling Price / বিক্রয় মূল্য">
-<input id="qty" placeholder="Quantity Sold / কতটা বিক্রি">
+<input id="name" placeholder="Product Name">
+<input id="stock" placeholder="Stock / মজুদ">
+<input id="sold" placeholder="Sold / বিক্রি">
 
-<button onclick="calcProfit()">Calculate</button>
-
-<h3 id="result"></h3>
+<button onclick="saveData()">Save</button>
 
 </div>
 
 <div class="card">
 
-<h3 id="t2">Ad Break-even Calculator</h3>
-
-<input id="ad" placeholder="Ad Budget / বিজ্ঞাপন বাজেট">
-<input id="profit" placeholder="Profit per product / প্রতি পণ্যে লাভ">
-
-<button onclick="calcAd()">Calculate</button>
-
-<h3 id="adResult"></h3>
+<h3 id="historyTitle">📜 History</h3>
+<div id="list"></div>
 
 </div>
 
 <div class="card">
 
-<h3>📈 AI Suggestion</h3>
-<p id="ai">Enter data to get suggestion</p>
+<h3>➕ Add Extra Field</h3>
+<input id="newField" placeholder="Field name">
+<button onclick="addField()">Add Field</button>
+
+<div id="extraFields"></div>
 
 </div>
 
 <div class="card">
 
-<h3>👤 App Owner</h3>
+<h3>👤 Owner</h3>
 <p>Muhammad Umar Arju</p>
 
 <a href="https://www.instagram.com/muhammad_umar_arju?igsh=MTV1ZGwwaDMwNm03Mw%3D%3D&utm_source=qr" target="_blank">
@@ -101,63 +95,79 @@ a{
 
 <script>
 
-// Language switch
-document.getElementById("lang").onchange = function(){
-  let lang = this.value;
+let data = JSON.parse(localStorage.getItem("data") || "[]");
+let fields = [];
+
+// save main data
+function saveData(){
+
+  let obj = {
+    name: document.getElementById("name").value,
+    stock: document.getElementById("stock").value,
+    sold: document.getElementById("sold").value,
+    extra: {}
+  };
+
+  fields.forEach(f=>{
+    obj.extra[f] = document.getElementById(f).value || "";
+  });
+
+  data.push(obj);
+  localStorage.setItem("data", JSON.stringify(data));
+
+  showData();
+}
+
+// show history
+function showData(){
+  let html = "";
+
+  data.forEach((d,i)=>{
+    html += `
+    <div class="card">
+      <b>${d.name}</b><br>
+      Stock: ${d.stock}<br>
+      Sold: ${d.sold}<br>
+      `;
+
+    for(let k in d.extra){
+      html += `${k}: ${d.extra[k]}<br>`;
+    }
+
+    html += "</div>";
+  });
+
+  document.getElementById("list").innerHTML = html;
+}
+
+// add custom field
+function addField(){
+  let f = document.getElementById("newField").value;
+  if(!f) return;
+
+  fields.push(f);
+
+  let input = document.createElement("input");
+  input.placeholder = f;
+  input.id = f;
+
+  document.getElementById("extraFields").appendChild(input);
+}
+
+// language switch
+function changeLang(){
+  let lang = document.getElementById("lang").value;
 
   if(lang=="bn"){
-    document.getElementById("t1").innerText="খরচ ও লাভ হিসাব";
-    document.getElementById("t2").innerText="বিজ্ঞাপন ব্রেক-ইভেন হিসাব";
+    document.getElementById("title").innerText="পণ্য যোগ করুন";
+    document.getElementById("historyTitle").innerText="হিস্টরি";
   }else{
-    document.getElementById("t1").innerText="Cost & Profit Calculator";
-    document.getElementById("t2").innerText="Ad Break-even Calculator";
+    document.getElementById("title").innerText="Add Product Entry";
+    document.getElementById("historyTitle").innerText="History";
   }
 }
 
-// Profit calculator
-function calcProfit(){
-  let cost = +document.getElementById("cost").value;
-  let sell = +document.getElementById("sell").value;
-  let qty = +document.getElementById("qty").value;
-
-  let profit = (sell - cost) * qty;
-
-  document.getElementById("result").innerText =
-  "Profit / লাভ: " + profit;
-
-  smartAI(profit);
-}
-
-// Ad calculator
-function calcAd(){
-  let ad = +document.getElementById("ad").value;
-  let profit = +document.getElementById("profit").value;
-
-  let need = ad / profit;
-
-  document.getElementById("adResult").innerText =
-  "Need Sales / বিক্রি দরকার: " + Math.ceil(need);
-
-  smartAI(need);
-}
-
-// Simple AI logic (rule based)
-function smartAI(value){
-
-  let msg = "";
-
-  if(value < 0){
-    msg = "⚠️ Loss detected! Cost too high or price low.";
-  }
-  else if(value > 0 && value < 1000){
-    msg = "👍 Small profit. Try increasing sales or margin.";
-  }
-  else{
-    msg = "🔥 Good business! Keep scaling.";
-  }
-
-  document.getElementById("ai").innerText = msg;
-}
+showData();
 
 </script>
 
