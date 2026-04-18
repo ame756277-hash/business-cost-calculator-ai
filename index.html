@@ -132,3 +132,144 @@ function generateApp() {
 
 </body>
 </html>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>App Builder Pro</title>
+<style>
+body{
+  font-family: Arial;
+  background:#0f172a;
+  color:white;
+  text-align:center;
+  padding:20px;
+}
+textarea,input{
+  width:90%;
+  padding:10px;
+  margin:10px 0;
+}
+button{
+  padding:10px 20px;
+  background:#22c55e;
+  border:none;
+  color:white;
+  border-radius:8px;
+}
+iframe{
+  width:95%;
+  height:300px;
+  margin-top:10px;
+  background:white;
+}
+.card{
+  background:#1e293b;
+  padding:10px;
+  margin-top:10px;
+  border-radius:10px;
+}
+a{
+  color:#38bdf8;
+}
+</style>
+</head>
+<body>
+
+<h2>⚡ App Builder Pro</h2>
+
+<textarea id="prompt" placeholder="write: todo / calculator / note"></textarea>
+<br>
+<button onclick="generate()">Generate App</button>
+
+<div id="preview"></div>
+
+<h3>📜 History (Apps)</h3>
+<div id="history"></div>
+
+<script>
+
+// history save in browser
+let apps = JSON.parse(localStorage.getItem("apps") || "[]");
+
+function generate(){
+  let p = document.getElementById("prompt").value.toLowerCase();
+
+  let code = "";
+  let name = "app-" + Date.now();
+
+  if(p.includes("todo")){
+    code = `
+    <h3>Todo App</h3>
+    <input id='t'>
+    <button onclick='add()'>Add</button>
+    <ul id='list'></ul>
+
+    <script>
+    function add(){
+      let li=document.createElement('li');
+      li.innerText=document.getElementById('t').value;
+      document.getElementById('list').appendChild(li);
+    }
+    <\/script>
+    `;
+  }
+
+  else if(p.includes("calculator")){
+    code = `
+    <h3>Calculator</h3>
+    <input id='a'>
+    <input id='b'>
+    <button onclick='add()'>Add</button>
+    <h3 id='r'></h3>
+
+    <script>
+    function add(){
+      let a=+document.getElementById('a').value;
+      let b=+document.getElementById('b').value;
+      document.getElementById('r').innerText=a+b;
+    }
+    <\/script>
+    `;
+  }
+
+  else{
+    code="<h3>App not found</h3>";
+  }
+
+  // create preview link (fake local link system)
+  let blob = new Blob([code], {type:"text/html"});
+  let url = URL.createObjectURL(blob);
+
+  document.getElementById("preview").innerHTML =
+  `<h3>Preview</h3><iframe src="${url}"></iframe>
+   <br><a href="${url}" target="_blank">Open Full App</a>`;
+
+  // save history
+  apps.push({name:name, prompt:p, url:url});
+  localStorage.setItem("apps", JSON.stringify(apps));
+
+  showHistory();
+}
+
+function showHistory(){
+  let html="";
+  apps.forEach(a=>{
+    html+=`
+    <div class="card">
+      <b>${a.name}</b><br>
+      ${a.prompt}<br>
+      <a href="${a.url}" target="_blank">Open App</a>
+    </div>
+    `;
+  });
+
+  document.getElementById("history").innerHTML=html;
+}
+
+showHistory();
+
+</script>
+
+</body>
+</html>
