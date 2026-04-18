@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Business Notebook</title>
+<title>Excel Notebook</title>
 
 <style>
 body{
@@ -10,15 +10,26 @@ body{
   background:#0f172a;
   color:white;
   text-align:center;
-  padding:20px;
+  padding:10px;
+}
+
+table{
+  width:100%;
+  margin-top:20px;
+  border-collapse: collapse;
+}
+
+th, td{
+  border:1px solid #334155;
+  padding:8px;
 }
 
 input{
-  width:85%;
-  padding:10px;
-  margin:6px;
-  border-radius:8px;
+  width:100%;
+  background:#1e293b;
+  color:white;
   border:none;
+  padding:5px;
 }
 
 button{
@@ -28,16 +39,13 @@ button{
   border:none;
   color:white;
   border-radius:8px;
-  cursor:pointer;
 }
 
 .card{
   background:#1e293b;
-  padding:15px;
-  margin-top:15px;
-  border-radius:10px;
+  padding:10px;
+  margin-top:10px;
 }
-
 a{ color:#38bdf8; }
 </style>
 
@@ -45,129 +53,96 @@ a{ color:#38bdf8; }
 
 <body>
 
-<h2>📒 Business Notebook</h2>
+<h2>📊 Excel Notebook App</h2>
 
-<p>Language / ভাষা</p>
-<select id="lang" onchange="changeLang()">
-  <option value="en">English</option>
-  <option value="bn">বাংলা</option>
-</select>
+<button onclick="addRow()">➕ Add Row</button>
+<button onclick="save()">💾 Save</button>
+<button onclick="load()">📂 Load</button>
 
-<div class="card">
-
-<h3 id="title">Add Product Entry</h3>
-
-<input id="name" placeholder="Product Name">
-<input id="stock" placeholder="Stock / মজুদ">
-<input id="sold" placeholder="Sold / বিক্রি">
-
-<button onclick="saveData()">Save</button>
-
-</div>
+<table id="table">
+  <tr>
+    <th>Product</th>
+    <th>Stock</th>
+    <th>Sold</th>
+    <th>Price</th>
+  </tr>
+</table>
 
 <div class="card">
-
-<h3 id="historyTitle">📜 History</h3>
-<div id="list"></div>
-
-</div>
-
-<div class="card">
-
-<h3>➕ Add Extra Field</h3>
-<input id="newField" placeholder="Field name">
-<button onclick="addField()">Add Field</button>
-
-<div id="extraFields"></div>
-
-</div>
-
-<div class="card">
-
 <h3>👤 Owner</h3>
 <p>Muhammad Umar Arju</p>
 
 <a href="https://www.instagram.com/muhammad_umar_arju?igsh=MTV1ZGwwaDMwNm03Mw%3D%3D&utm_source=qr" target="_blank">
 👉 Follow on Instagram
 </a>
-
 </div>
 
 <script>
 
-let data = JSON.parse(localStorage.getItem("data") || "[]");
-let fields = [];
+function addRow(){
+  let table = document.getElementById("table");
 
-// save main data
-function saveData(){
+  let row = table.insertRow();
 
-  let obj = {
-    name: document.getElementById("name").value,
-    stock: document.getElementById("stock").value,
-    sold: document.getElementById("sold").value,
-    extra: {}
-  };
-
-  fields.forEach(f=>{
-    obj.extra[f] = document.getElementById(f).value || "";
-  });
-
-  data.push(obj);
-  localStorage.setItem("data", JSON.stringify(data));
-
-  showData();
+  row.innerHTML = `
+    <td><input></td>
+    <td><input></td>
+    <td><input></td>
+    <td><input></td>
+  `;
 }
 
-// show history
-function showData(){
-  let html = "";
+// save to localStorage
+function save(){
 
-  data.forEach((d,i)=>{
-    html += `
-    <div class="card">
-      <b>${d.name}</b><br>
-      Stock: ${d.stock}<br>
-      Sold: ${d.sold}<br>
-      `;
+  let table = document.getElementById("table");
+  let data = [];
 
-    for(let k in d.extra){
-      html += `${k}: ${d.extra[k]}<br>`;
-    }
-
-    html += "</div>";
-  });
-
-  document.getElementById("list").innerHTML = html;
-}
-
-// add custom field
-function addField(){
-  let f = document.getElementById("newField").value;
-  if(!f) return;
-
-  fields.push(f);
-
-  let input = document.createElement("input");
-  input.placeholder = f;
-  input.id = f;
-
-  document.getElementById("extraFields").appendChild(input);
-}
-
-// language switch
-function changeLang(){
-  let lang = document.getElementById("lang").value;
-
-  if(lang=="bn"){
-    document.getElementById("title").innerText="পণ্য যোগ করুন";
-    document.getElementById("historyTitle").innerText="হিস্টরি";
-  }else{
-    document.getElementById("title").innerText="Add Product Entry";
-    document.getElementById("historyTitle").innerText="History";
+  for(let i=1;i<table.rows.length;i++){
+    let row = table.rows[i];
+    let obj = {
+      product: row.cells[0].children[0].value,
+      stock: row.cells[1].children[0].value,
+      sold: row.cells[2].children[0].value,
+      price: row.cells[3].children[0].value
+    };
+    data.push(obj);
   }
+
+  localStorage.setItem("excelData", JSON.stringify(data));
+  alert("Saved!");
 }
 
-showData();
+// load data
+function load(){
+
+  let data = JSON.parse(localStorage.getItem("excelData") || "[]");
+
+  let table = document.getElementById("table");
+
+  // clear old rows
+  table.innerHTML = `
+    <tr>
+      <th>Product</th>
+      <th>Stock</th>
+      <th>Sold</th>
+      <th>Price</th>
+    </tr>
+  `;
+
+  data.forEach(d=>{
+    let row = table.insertRow();
+
+    row.innerHTML = `
+      <td><input value="${d.product}"></td>
+      <td><input value="${d.stock}"></td>
+      <td><input value="${d.sold}"></td>
+      <td><input value="${d.price}"></td>
+    `;
+  });
+}
+
+load();
 
 </script>
 
